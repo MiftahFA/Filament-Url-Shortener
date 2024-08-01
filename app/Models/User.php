@@ -4,6 +4,7 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 
+use AshAllenDesign\ShortURL\Models\ShortURL;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Panel;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
@@ -57,5 +58,11 @@ class User extends Authenticatable implements FilamentUser
         // If the panel ID is 'user' and the user is not an admin, return true
         // Otherwise, return false
         return ($panelId === 'admin' && $this->is_admin) || ($panelId === 'user' && !$this->is_admin);
+    }
+
+    //add has many short_urls relationship
+    public function short_urls()
+    {
+        return $this->hasMany(ShortURL::class);
     }
 }
