@@ -14,6 +14,7 @@ class MyShortUrl extends ShortURL
 
     protected $fillable = [
         'destination_url',
+        'image',
         'default_short_url',
         'url_key',
         'single_use',
