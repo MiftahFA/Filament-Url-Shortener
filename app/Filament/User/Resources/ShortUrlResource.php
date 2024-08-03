@@ -8,9 +8,16 @@ use App\Models\MyShortUrl;
 use Filament\Forms;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
+use Filament\Infolists\Components\ImageEntry;
+use Filament\Infolists\Components\Section;
+use Filament\Infolists\Components\Split;
+use Filament\Infolists\Components\TextEntry;
+use Filament\Infolists\Components\ViewEntry;
+use Filament\Infolists\Infolist;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Actions\DeleteAction;
+use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
@@ -58,6 +65,7 @@ class ShortUrlResource extends Resource
                 //
             ])
             ->actions([
+                ViewAction::make(),
                 Tables\Actions\EditAction::make(),
                 DeleteAction::make(),
             ])
@@ -65,6 +73,39 @@ class ShortUrlResource extends Resource
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
+            ]);
+    }
+
+
+    public static function infolist(Infolist $infolist): Infolist
+    {
+        return $infolist
+            ->inlineLabel()
+            ->schema([
+                Section::make('Details')->schema([
+                    TextEntry::make('destination_url')
+                        ->label('Destination URL'),
+                    TextEntry::make('default_short_url')
+                        ->label('Default Short URL')
+                        ->url(fn (MyShortUrl $record): string => url($record->default_short_url))
+                        ->openUrlInNewTab(),
+                    ImageEntry::make('image')->label('QR Code')->disk('qrcode')->size(200),
+                ]),
+                //add new section name it analytics
+                Section::make('Analytics')
+                    ->schema([
+                        ViewEntry::make('stats_overview')
+                            ->view('widget.short-url.stats-overview')
+                            ->label('Overview'),
+                        Split::make([
+                            ViewEntry::make('visit_chart')
+                                ->view('widget.short-url.visit'),
+                            ViewEntry::make('visit_chart')
+                                ->view('widget.short-url.visit-by-os'),
+                            ViewEntry::make('visit_chart')
+                                ->view('widget.short-url.visit-by-browser'),
+                        ])
+                    ]),
             ]);
     }
 
@@ -80,6 +121,7 @@ class ShortUrlResource extends Resource
         return [
             'index' => Pages\ListShortUrls::route('/'),
             'create' => Pages\CreateShortUrl::route('/create'),
+            'view' => Pages\ViewShortUrl::route('/{record}'),
             'edit' => Pages\EditShortUrl::route('/{record}/edit'),
         ];
     }
